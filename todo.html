@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Aufgabenplaner</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    
+    h1 {
+      color: #333;
+      text-align: center;
+    }
+    
+    .input-container {
+      display: flex;
+      margin-bottom: 20px;
+      gap: 10px;
+    }
+    
+    #taskInput {
+      flex: 1;
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    
+    button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    #addBtn {
+      background-color: #4CAF50;
+      color: white;
+    }
+    
+    #addBtn:hover {
+      background-color: #45a049;
+    }
+    
+    #clearBtn {
+      background-color: #f44336;
+      color: white;
+    }
+    
+    #clearBtn:hover {
+      background-color: #da190b;
+    }
+    
+    #taskList {
+      list-style: none;
+      padding: 0;
+    }
+    
+    .task-item {
+      background-color: white;
+      margin: 10px 0;
+      padding: 15px;
+      border-radius: 5px;
+      border-left: 4px solid #4CAF50;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .task-item:hover {
+      transform: translateX(5px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .done {
+      text-decoration: line-through;
+      color: gray;
+      background-color: #f0f0f0;
+      border-left-color: #ccc;
+    }
+    
+    .task-text {
+      font-size: 16px;
+      margin: 0;
+    }
+    
+    .task-date {
+      font-size: 12px;
+      color: #666;
+      margin-top: 5px;
+    }
+    
+    .empty-state {
+      text-align: center;
+      color: #666;
+      font-style: italic;
+      padding: 40px;
+      background-color: white;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Meine Aufgaben</h1>
+  
+  <div class="input-container">
+    <input type="text" id="taskInput" placeholder="Neue Aufgabe eingeben...">
+    <button id="addBtn">Hinzufügen</button>
+    <button id="clearBtn">Zurücksetzen</button>
+  </div>
+  
+  <ul id="taskList"></ul>
+
+  <script>
+    const taskInput = document.querySelector('#taskInput');
+    const addBtn = document.querySelector('#addBtn');
+    const clearBtn = document.querySelector('#clearBtn');
+    const taskList = document.querySelector('#taskList');
+    
+    let tasks = [];
+
+    renderTasks();
+
+    function addTask() {
+      const taskText = taskInput.value.trim();
+      
+      if (taskText !== '') {
+        const newTask = {
+          id: Date.now(),
+          text: taskText,
+          completed: false,
+          dateAdded: new Date().toLocaleString('de-DE')
+        };
+        
+        tasks.push(newTask);
+        
+        taskInput.value = '';
+        
+        renderTasks();
+      }
+    }
+    
+    function toggleTask(taskId) {
+      for (let i = 0; i < tasks.length; i++) {
+        if (tasks[i].id === taskId) {
+          // Status umschalten
+          tasks[i].completed = !tasks[i].completed;
+          break;
+        }
+      }
+      renderTasks();
+    }
+
+    function clearAllTasks() {
+      if (tasks.length > 0) {
+        if (confirm('Möchtest Du wirklich alle Aufgaben löschen?')) {
+          tasks = [];
+          renderTasks();
+        }
+      }
+    }
+
+    function renderTasks() {
+      taskList.innerHTML = '';
+      
+      if (tasks.length === 0) {
+        const emptyState = document.createElement('li');
+        emptyState.className = 'empty-state';
+        emptyState.textContent = 'Keine Aufgaben vorhanden. Fügen Sie eine neue Aufgabe hinzu!';
+        taskList.appendChild(emptyState);
+        return;
+      }
+      
+      tasks.forEach(task => {
+        const listItem = document.createElement('li');
+        listItem.className = 'task-item';
+        
+        if (task.completed) {
+          listItem.classList.add('done');
+        }
+        
+        listItem.innerHTML = `
+          <div class="task-text">${escapeHtml(task.text)}</div>
+          <div class="task-date">Hinzugefügt: ${task.dateAdded}</div>
+        `;
+        
+        listItem.addEventListener('click', () => {
+          toggleTask(task.id);
+        });
+        
+        taskList.appendChild(listItem);
+      });
+    }
+    
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    addBtn.addEventListener('click', addTask);
+    clearBtn.addEventListener('click', clearAllTasks);
+    taskInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter'){addTask()}
+    });
+    
+
+    taskInput.focus();
+    
+    renderTasks();
+  </script>
+</body>
+</html>
